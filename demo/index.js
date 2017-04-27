@@ -19,7 +19,7 @@ class TestComponent extends React.Component {
                     className="carousel"
                     ref="carousel"
                     isInfinity={true}
-                    autoplay={true}
+                    autoplay={false}
                     autoplayDelay={5000}
                 >
                     <div style={{height: 250, backgroundColor: 'red'}}>Slide - 1</div>
