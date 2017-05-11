@@ -9,5 +9,6 @@ ehthumbs.db
 Thumbs.db
 node_modules/*
 .sass-cache
+notes.md
 
 dist/

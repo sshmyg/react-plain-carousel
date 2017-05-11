@@ -18,7 +18,7 @@ class TestComponent extends React.Component {
                 <ReactSimpleCarousel
                     className="carousel"
                     ref="carousel"
-                    isInfinity={true}
+                    isInfinity={false}
                     autoplay={false}
                     autoplayDelay={5000}
                 >

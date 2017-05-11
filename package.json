@@ -1,11 +1,12 @@
 {
   "author": "Serhey Shmyg",
-  "name": "Frontend",
-  "version": "3.0.0",
+  "name": "react-plain-carousel",
+  "version": "1.0.0",
   "homepage": "https://github.com/serheyShmyg/",
+  "main": "./src",
   "repository": {
     "type": "git",
-    "url": "https://github.com/serheyShmyg/frontend"
+    "url": "https://github.com/serheyShmyg/react-plain-carousel"
   },
   "scripts": {
     "start": "webpack --progress --hide-modules",

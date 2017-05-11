@@ -1,17 +1,5 @@
 import React from 'react';
-
- /*   -webkit-transform: translate3d(0, 0, 0);
-    -moz-transform: translate3d(0, 0, 0);
-    -ms-transform: translate3d(0, 0, 0);
-    -o-transform: translate3d(0, 0, 0);
-    transform: translate3d(0, 0, 0);
-http://kenwheeler.github.io/slick/
-https://raw.githubusercontent.com/kenwheeler/slick/master/slick/slick.js
-
-https://github.com/thebird/Swipe/blob/master/swipe.js
-http://voronianski.github.io/react-swipe/demo/
-https://css-tricks.com/the-javascript-behind-touch-friendly-sliders/
-    */
+import PropTypes from 'prop-types';
 
 const defaultStyles = {
     wrapper: {
@@ -27,15 +15,15 @@ const defaultStyles = {
 
 export default class ReactCarousel extends React.Component {
     static propTypes = {
-        startSlideIndex: React.PropTypes.number,
-        isInfinity: React.PropTypes.bool,
-        autoplay: React.PropTypes.bool,
-        autoplayDelay: React.PropTypes.number,
-        transitionTimingFunc: React.PropTypes.string,
-        transitionDelay: React.PropTypes.number,
-        onTransitionEnd: React.PropTypes.func,
-        className: React.PropTypes.string,
-        children: React.PropTypes.node,
+        startSlideIndex: PropTypes.number,
+        isInfinity: PropTypes.bool,
+        autoplay: PropTypes.bool,
+        autoplayDelay: PropTypes.number,
+        transitionTimingFunc: PropTypes.string,
+        transitionDelay: PropTypes.number,
+        onTransitionEnd: PropTypes.func,
+        className: PropTypes.string,
+        children: PropTypes.node,
     }
 
     static defaultProps = {
@@ -64,7 +52,11 @@ export default class ReactCarousel extends React.Component {
 
     touchMove = {}
 
-    longTouch = undefined
+    isLongTouch = false
+
+    componentWillUnmount() {
+        this.stopAutoplay();
+    }
 
     componentDidMount() {
         const { autoplay } = this.props;
@@ -90,7 +82,8 @@ export default class ReactCarousel extends React.Component {
         //Silent move to last slide
         if (index === 0 && !isTransition) {
             this.moveTo({
-                index: slidesNumbers - 2
+                index: slidesNumbers - 2,
+                isTransition: false
             });
         }
 
@@ -180,10 +173,26 @@ export default class ReactCarousel extends React.Component {
         this.move(-1);
     }
 
+    getIndex(delta = 1) {
+        const { isInfinity } = this.props;
+        const { index } = this.state;
+        const { slidesNumbers } = this.getParams();
+
+        if (!isInfinity) {
+            return index;
+        }
+
+        if (index - delta > slidesNumbers - 2 - delta) {
+            return 0;
+        }
+
+        return index - delta;
+    }
+
     move(delta) {
-        let { onTransitionEnd, transitionDelay } = this.props;
+        const { onTransitionEnd, transitionDelay, autoplay } = this.props;
         let { index, isTransition } = this.state;
-        let { slidesNumbers } = this.getParams();
+        const { slidesNumbers } = this.getParams();
 
         if (
             !delta ||
@@ -193,6 +202,8 @@ export default class ReactCarousel extends React.Component {
         ) {
             return false;
         }
+
+        autoplay && this.initAutoplay();
 
         index = index + delta;
 
@@ -205,7 +216,7 @@ export default class ReactCarousel extends React.Component {
 
         setTimeout(() => {
             this.setState(() => ({ isTransition: false }));
-            typeof onTransitionEnd === 'function' && onTransitionEnd();
+            typeof onTransitionEnd === 'function' && onTransitionEnd({ index: this.getIndex() });
         }, transitionDelay);
     }
 
@@ -266,11 +277,8 @@ export default class ReactCarousel extends React.Component {
     handleTouchStart = (e) => {
         const { touches } = e;
 
-        // Test for flick.
-        this.longTouch = false;
-
         setTimeout(() => {
-            this.longTouch = true;
+            this.isLongTouch = true;
         }, 250);
 
         this.touchStart = {
@@ -281,11 +289,17 @@ export default class ReactCarousel extends React.Component {
     }
 
     handleTouchMove = (e) => {
-        const { touches } = e;
+        const { touches, scale } = e;
         const { index } = this.state;
         const { width } = this.getParams();
 
-        // Continuously return touch position.
+        // ensure swiping with one touch and not pinching
+        if (touches.length > 1 || scale && scale !== 1) {
+            return;
+        }
+
+        e.preventDefault();
+
         const x = touches[0].pageX;
         const y = touches[0].pageY;
 
@@ -296,39 +310,53 @@ export default class ReactCarousel extends React.Component {
             deltaX: index * width + (this.touchStart.x - x)
         };
 
-        this.setState(() => ({ customTransform: this.touchMove.deltaX }));
-
-        // Defines the speed the images should move at.
-        //const panx = 100 - this.touchMove.deltaX / 6;
-
-        // Corrects an edge-case problem where the background image moves without the container moving.
-        // if (panx < 100) {
-        //     this.el.imgSlide.css('transform','translate3d(-' + panx + 'px,0,0)');
-        // }
+        this.setState(() => ({
+            customTransform: this.touchMove.deltaX,
+            isTransition: false
+        }));
     }
 
     handleTouchEnd = () => {
+        const { isInfinity } = this.props;
         const { index } = this.state;
-        const { width } = this.getParams();
+        const { width, slidesNumbers } = this.getParams();
         const { deltaX } = this.touchMove;
         const absMove = Math.abs(index * width - deltaX);
+        const isFirstSlide = index === 0;
+        const isLastSlide = (slidesNumbers - (index + 1) === 0);
+        const moveDelta = deltaX > index * width ? 1 : -1;
+        const handleState = () => ({
+            customTransform: undefined,
+            isTransition: true
+        });
 
-        if (absMove > width / 2 || this.longTouch === false) {
-            if (deltaX > index * width /*&& index < 2*/) {
-                this.move(1);
+        if (!isInfinity) {
+            if (!this.isLongTouch || absMove > width / 2) {
+                if (isLastSlide && moveDelta === 1) {
+                    this.setState(handleState);
+                } else {
+                    this.move(moveDelta);
+                }
             } else {
-                this.move(-1);
+                this.setState(handleState);
             }
         } else {
-            this.setState(() => ({
-                customTransform: undefined,
-                isTransition: true
-            }));
+            if (!this.isLongTouch || absMove > width / 2) {
+                this.move(moveDelta);
+            } else {
+                this.setState(handleState);
+            }
         }
+
+        // if (!this.isLongTouch || absMove > width / 2) {
+        //     this.move(moveDelta);
+        // } else {
+        //     this.setState(handleState);
+        // }
 
         this.touchStart = {};
         this.touchMove = {};
-        this.longTouch = undefined;
+        this.isLongTouch = false;
     }
 
     render() {
