@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component, Children } from 'react';
 import PropTypes from 'prop-types';
 
 const defaultStyles = {
@@ -39,37 +39,35 @@ export default class ReactCarousel extends React.Component {
     constructor(...args) {
         super(...args);
 
+        const { children } = this.props;
+        const slidesNumbers = Children.count(children);
+        const isInfinity = this.props.isInfinity && slidesNumbers > 1;
+
         this.state = {
             isMounted: false,
             customTransform: undefined,
-            index: this.props.isInfinity ? 1 : 0
+            index: isInfinity ? 1 : 0,
+            isInfinity,
+            slidesNumbers: isInfinity ? slidesNumbers + 2 : slidesNumbers
         };
     }
 
-    autoplayInterval = undefined
-
-    touchStart = {}
-
-    touchMove = {}
-
-    isLongTouch = false
-
-    componentWillUnmount() {
-        this.stopAutoplay();
-    }
-
     componentDidMount() {
-        const { autoplay } = this.props;
+        this.setState({
+            width: this.$wrapper && this.$wrapper.clientWidth,
+            isMounted: true
+        });
 
-        this.setState({ isMounted: true });
-
-        autoplay && this.initAutoplay();
+        this.initAutoplay();
     }
 
     componentDidUpdate() {
-        const { isInfinity } = this.props;
-        const { index, isTransition } = this.state;
-        const { slidesNumbers } = this.getParams();
+        const {
+            index,
+            isTransition,
+            isInfinity,
+            slidesNumbers
+        } = this.state;
 
         if (!isInfinity && (index === slidesNumbers - 1) && !isTransition) {
             this.stopAutoplay();
@@ -96,29 +94,23 @@ export default class ReactCarousel extends React.Component {
         }
     }
 
-    getParams() {
-        let { isMounted } = this.state;
-
-        if (!isMounted) {
-            return {};
-        }
-
-        let { children, isInfinity } = this.props;
-        let width = this.$wrapper.clientWidth;
-        let slidesNumbers= React.Children.count(children);
-
-        if (isInfinity) {
-            slidesNumbers += 2;
-        }
-
-        return {
-            width,
-            slidesNumbers
-        };
+    componentWillUnmount() {
+        this.stopAutoplay();
     }
 
+    autoplayInterval = undefined
+
+    touchStart = {}
+
+    touchMove = {}
+
+    isLongTouch = false
+
     getInnerWidth() {
-        let { width, slidesNumbers } = this.getParams();
+        const {
+            width,
+            slidesNumbers
+        } = this.state;
 
         if (!width || !slidesNumbers) {
             return null;
@@ -132,11 +124,10 @@ export default class ReactCarousel extends React.Component {
             return false;
         }
 
-        let { width } = this.getParams();
-        let { slide } = defaultStyles;
+        const { width } = this.state;
 
-        slide = {
-            ...slide,
+        const slide = {
+            ...defaultStyles.slide,
             width
         };
 
@@ -150,9 +141,10 @@ export default class ReactCarousel extends React.Component {
     }
 
     getChildren() {
-        let { children, isInfinity } = this.props;
+        const { children } = this.props;
+        const { isInfinity } = this.state;
 
-        let clonedChildren = React.Children.map(children, this.cloneChild);
+        const clonedChildren = Children.map(children, this.cloneChild);
 
         if (!isInfinity) {
             return clonedChildren;
@@ -174,9 +166,11 @@ export default class ReactCarousel extends React.Component {
     }
 
     getIndex(delta = 1) {
-        const { isInfinity } = this.props;
-        const { index } = this.state;
-        const { slidesNumbers } = this.getParams();
+        const {
+            index,
+            isInfinity,
+            slidesNumbers
+        } = this.state;
 
         if (!isInfinity) {
             return index;
@@ -190,9 +184,15 @@ export default class ReactCarousel extends React.Component {
     }
 
     move(delta) {
-        const { onTransitionEnd, transitionDelay, autoplay } = this.props;
-        let { index, isTransition } = this.state;
-        const { slidesNumbers } = this.getParams();
+        const {
+            onTransitionEnd,
+            transitionDelay
+        } = this.props;
+        let {
+            index,
+            isTransition,
+            slidesNumbers
+        } = this.state;
 
         if (
             !delta ||
@@ -203,7 +203,7 @@ export default class ReactCarousel extends React.Component {
             return false;
         }
 
-        autoplay && this.initAutoplay();
+        this.initAutoplay();
 
         index = index + delta;
 
@@ -228,8 +228,10 @@ export default class ReactCarousel extends React.Component {
     }
 
     calcTransform(value, direction = '-') {
-        const { index } = this.state;
-        const { width } = this.getParams();
+        const {
+            index,
+            width
+        } = this.state;
 
         value = value || (index * width);
 
@@ -263,7 +265,16 @@ export default class ReactCarousel extends React.Component {
     }
 
     initAutoplay() {
-        const { autoplayDelay, transitionDelay } = this.props;
+        const {
+            autoplayDelay,
+            transitionDelay,
+            autoplay
+        } = this.props;
+        const { slidesNumbers } = this.state;
+
+        if (!autoplay || slidesNumbers <= 1) {
+            return false;
+        }
 
         if (autoplayDelay < transitionDelay) {
             throw new Error('`autoplayDelay` less than `transitionDelay`, fix it');
@@ -289,9 +300,14 @@ export default class ReactCarousel extends React.Component {
     }
 
     handleTouchMove = (e) => {
-        const { touches, scale } = e;
-        const { index } = this.state;
-        const { width } = this.getParams();
+        const {
+            touches,
+            scale
+        } = e;
+        const {
+            index,
+            width
+        } = this.state;
 
         // ensure swiping with one touch and not pinching
         if (touches.length > 1 || scale && scale !== 1) {
@@ -317,9 +333,12 @@ export default class ReactCarousel extends React.Component {
     }
 
     handleTouchEnd = () => {
-        const { isInfinity } = this.props;
-        const { index } = this.state;
-        const { width, slidesNumbers } = this.getParams();
+        const {
+            index,
+            isInfinity,
+            width,
+            slidesNumbers
+        } = this.state;
         const { deltaX } = this.touchMove;
         const absMove = Math.abs(index * width - deltaX);
         const isFirstSlide = index === 0;
