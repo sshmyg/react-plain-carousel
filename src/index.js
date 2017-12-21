@@ -1,8 +1,6 @@
 import React, { Component, Children } from 'react';
 import PropTypes from 'prop-types';
 
-import getVendorPrefix from './getVendorPrefix';
-
 const defaultStyles = {
     wrapper: {
         overflow: 'hidden'
@@ -46,7 +44,6 @@ export default class ReactCarousel extends Component {
         const { children } = this.props;
         const slidesNumbers = Children.count(children);
         const isInfinity = this.props.isInfinity && slidesNumbers > 1;
-        const prefix = getVendorPrefix();
 
         this.state = {
             isMounted: false,
@@ -56,7 +53,7 @@ export default class ReactCarousel extends Component {
             slidesNumbers: isInfinity ? slidesNumbers + 2 : slidesNumbers,
             isTransition: null, //animate moving or not
             isTransitionInProgress: false,
-            transitionEventName: prefix ? `${prefix}TransitionEnd` : 'transitionEnd'
+            transitionEventName: 'transitionend'
         };
     }
 
