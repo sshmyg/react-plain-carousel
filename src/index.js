@@ -123,7 +123,7 @@ export default class ReactCarousel extends Component {
 
         this.stopAutoplay();
         window.removeEventListener('resize', this.handleResize);
-        this.$inner.addEventListener(transitionEventName, this.handleTransitionEnd);
+        this.$inner.removeEventListener(transitionEventName, this.handleTransitionEnd);
     }
 
     autoplayInterval = undefined
