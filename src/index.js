@@ -338,7 +338,7 @@ export default class ReactCarousel extends Component {
             return;
         }
 
-        e.preventDefault();
+        //e.preventDefault();
 
         const x = touches[0].pageX;
         const y = touches[0].pageY;
