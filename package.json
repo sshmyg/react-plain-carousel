@@ -13,7 +13,7 @@
     "demo": "webpack-dev-server --progress",
     "clear": "rm -rf dist node_modules",
     "build": "NODE_ENV=production webpack --progress --hide-modules",
-    "postuninstall": "npm run build"
+    "postinstall": "npm run build"
   },
   "devDependencies": {
     "babel-core": "^6.21.0",
