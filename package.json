@@ -12,7 +12,8 @@
     "start": "webpack --progress --hide-modules",
     "demo": "webpack-dev-server --progress",
     "clear": "rm -rf dist node_modules",
-    "build": "NODE_ENV=production webpack --progress --hide-modules"
+    "build": "NODE_ENV=production webpack --progress --hide-modules",
+    "prepublish": "NODE_ENV=production webpack --progress --hide-modules"
   },
   "devDependencies": {
     "babel-core": "^6.21.0",
