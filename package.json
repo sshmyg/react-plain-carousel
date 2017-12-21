@@ -3,7 +3,7 @@
   "name": "react-plain-carousel",
   "version": "1.0.0",
   "homepage": "https://github.com/serheyShmyg/",
-  "jsnext:main": "./src",
+  "jsnext:main": "./dist/react-simple-carousel.js",
   "module": "./dist/react-simple-carousel.js",
   "repository": {
     "type": "git",
