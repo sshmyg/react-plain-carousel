@@ -13,7 +13,7 @@
     "demo": "webpack-dev-server --progress",
     "clear": "rm -rf dist node_modules",
     "build": "NODE_ENV=production webpack --progress --hide-modules",
-    "prepublish": "NODE_ENV=production webpack --progress --hide-modules"
+    "postinstall": "NODE_ENV=production webpack --progress --hide-modules"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
