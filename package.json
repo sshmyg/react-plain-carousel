@@ -1,7 +1,7 @@
 {
   "author": "Serhey Shmyg",
   "name": "react-plain-carousel",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "homepage": "https://github.com/serheyShmyg/",
   "main": "./dist/index.js",
   "jsnext:main": "./dist/index.js",
@@ -14,7 +14,8 @@
     "start": "webpack --progress --hide-modules",
     "demo": "webpack-dev-server --progress",
     "clear": "rm -rf dist node_modules",
-    "build": "NODE_ENV=production babel ./src --out-dir ./dist"
+    "build": "NODE_ENV=production babel ./src --out-dir ./dist",
+    "prepublish": "npm run build"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
