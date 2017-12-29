@@ -25,7 +25,7 @@ export default class ReactCarousel extends Component {
         transitionDelay: PropTypes.number,
         onTransitionEnd: PropTypes.func,
         className: PropTypes.string,
-        children: PropTypes.node,
+        children: PropTypes.node
     }
 
     static defaultProps = {

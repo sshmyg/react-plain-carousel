@@ -4,8 +4,6 @@
   "version": "1.0.1",
   "homepage": "https://github.com/serheyShmyg/",
   "main": "./dist/index.js",
-  "jsnext:main": "./dist/index.js",
-  "module": "./dist/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/serheyShmyg/react-plain-carousel"
@@ -17,6 +15,12 @@
     "build": "NODE_ENV=production babel ./src --out-dir ./dist",
     "prepublish": "npm run build"
   },
+  "keywords": [
+    "carousel",
+    "slider",
+    "react-slider",
+    "react-carousel"
+  ],
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
@@ -31,14 +35,12 @@
     "babel-preset-stage-1": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
     "webpack": "^3.10.0",
-    "webpack-dev-server": "^2.9.7"
-  },
-  "peerDependencies": {
+    "webpack-dev-server": "^2.9.7",
     "prop-types": "15.6.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0"
   },
-  "dependencies": {
+  "peerDependencies": {
     "prop-types": "15.6.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0"
