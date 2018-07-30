@@ -14,22 +14,41 @@ class TestComponent extends React.Component {
 
     render() {
         return (
-            <div style={{width: '100%'}}>
-                <ReactSimpleCarousel
-                    className="carousel"
-                    ref="carousel"
-                    isInfinity={false}
-                    autoplay={false}
-                    autoplayDelay={5000}
-                >
-                    <div style={{height: 250, backgroundColor: 'red'}}>Slide - 1</div>
-                    <div style={{height: 250, backgroundColor: 'green'}}>Slide - 2</div>
-                    <div style={{height: 250, backgroundColor: 'blue'}}>Slide - 3</div>
-                </ReactSimpleCarousel>
+            <div>
+                {/* <div style={{width: '100%'}}>
+                    <ReactSimpleCarousel
+                        className="carousel"
+                        ref="carousel"
+                        isInfinity={true}
+                        autoplay={false}
+                        autoplayDelay={5000}
+                    >
+                        <div style={{height: 250, backgroundColor: 'red'}}>Slide - 1</div>
+                        <div style={{height: 250, backgroundColor: 'green'}}>Slide - 2</div>
+                        <div style={{height: 250, backgroundColor: 'blue'}}>Slide - 3</div>
+                    </ReactSimpleCarousel>
 
-                <button onClick={this.prev.bind(this)}>Prev</button>
-                <button onClick={this.next.bind(this)}>Next</button>
+                    <button onClick={this.prev.bind(this)}>Prev</button>
+                    <button onClick={this.next.bind(this)}>Next</button>
+                </div> */}
+
+                <div style={{width: '100%'}}>
+                    <ReactSimpleCarousel
+                        className="carousel"
+                        ref="carousel"
+                        isInfinity={true}
+                        autoplay={false}
+                        autoplayDelay={5000}
+                    >
+                        <div><img src="https://www.westernbet.com/media/organisation_banners_images/2018/07/23/DOUBLE_DOUBLE.jpg" alt=""/></div>
+                        <div><img src="https://www.westernbet.com/media/organisation_banners_images/2018/07/23/casino_banner.jpg" alt=""/></div>
+                    </ReactSimpleCarousel>
+
+                    <button onClick={this.prev.bind(this)}>Prev</button>
+                    <button onClick={this.next.bind(this)}>Next</button>
+                </div>
             </div>
+
         );
     }
 }

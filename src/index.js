@@ -1,5 +1,4 @@
 import React, { Component, Children } from 'react';
-import PropTypes from 'prop-types';
 
 const defaultStyles = {
     wrapper: {
@@ -16,18 +15,6 @@ const defaultStyles = {
 let mountCounter = 0;
 
 export default class ReactCarousel extends Component {
-    static propTypes = {
-        startSlideIndex: PropTypes.number,
-        isInfinity: PropTypes.bool,
-        autoplay: PropTypes.bool,
-        autoplayDelay: PropTypes.number,
-        transitionTimingFunc: PropTypes.string,
-        transitionDelay: PropTypes.number,
-        onTransitionEnd: PropTypes.func,
-        className: PropTypes.string,
-        children: PropTypes.node
-    }
-
     static defaultProps = {
         startSlideIndex: 0,
         isInfinity: false,
@@ -35,7 +22,9 @@ export default class ReactCarousel extends Component {
         autoplayDelay: 1000,
         transitionTimingFunc: 'ease',
         transitionDelay: 500,
-        onTransitionEnd: null
+        onTransitionEnd: null,
+        className: undefined,
+        children: undefined
     }
 
     constructor(...args) {
@@ -57,7 +46,7 @@ export default class ReactCarousel extends Component {
         };
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         mountCounter += 1;
         this.wrapperClassName = `js-ref-wrapper-${mountCounter}`;
         this.innerClassName = `js-ref-inner-${mountCounter}`;

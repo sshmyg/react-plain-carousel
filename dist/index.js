@@ -17,10 +17,6 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
-var _propTypes = require('prop-types');
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -80,8 +76,8 @@ var ReactCarousel = (_temp = _class = function (_Component) {
     }
 
     _createClass(ReactCarousel, [{
-        key: 'componentWillMount',
-        value: function componentWillMount() {
+        key: 'UNSAFE_componentWillMount',
+        value: function UNSAFE_componentWillMount() {
             mountCounter += 1;
             this.wrapperClassName = 'js-ref-wrapper-' + mountCounter;
             this.innerClassName = 'js-ref-inner-' + mountCounter;
@@ -344,7 +340,9 @@ var ReactCarousel = (_temp = _class = function (_Component) {
     autoplayDelay: 1000,
     transitionTimingFunc: 'ease',
     transitionDelay: 500,
-    onTransitionEnd: null
+    onTransitionEnd: null,
+    className: undefined,
+    children: undefined
 }, _initialiseProps = function _initialiseProps() {
     var _this2 = this;
 

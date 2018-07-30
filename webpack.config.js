@@ -10,13 +10,13 @@ module.exports = {
     context: jsCWD,
     cache: true,
     devtool: isDev ? 'cheap-inline-module-sourcemap' : 'hidden',
+    mode: isDev ? 'development' : 'production',
 
     watchOptions: {
         aggregateTimeout: 100
     },
 
     entry: {
-        'react-simple-carousel': './index',
         'demo': '../demo/index'
     },
 
