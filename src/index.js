@@ -24,7 +24,8 @@ export default class ReactCarousel extends Component {
         transitionDelay: 500,
         onTransitionEnd: null,
         className: undefined,
-        children: undefined
+        children: undefined,
+        onMount: () => {}
     }
 
     constructor(...args) {
@@ -54,6 +55,7 @@ export default class ReactCarousel extends Component {
 
     componentDidMount() {
         const { transitionEventName } = this.state;
+        const { onMount } = this.props;
 
         this.$wrapper = document.querySelector('.' + this.wrapperClassName);
         this.$inner = document.querySelector('.' + this.innerClassName);
@@ -67,6 +69,14 @@ export default class ReactCarousel extends Component {
 
         window.addEventListener('resize', this.handleResize);
         this.$inner.addEventListener(transitionEventName, this.handleTransitionEnd);
+
+        onMount({
+            next: () => this.move(1),
+            prev: () => this.move(-1),
+            moveTo: index =>  typeof index === 'number'
+                ? this._moveTo({ index: index + 1 })
+                : undefined
+        });
     }
 
     componentDidUpdate() {
@@ -175,14 +185,6 @@ export default class ReactCarousel extends Component {
         ];
     }
 
-    next = () => {
-        this.move(1);
-    }
-
-    prev = () => {
-        this.move(-1);
-    }
-
     move(delta) {
         const {
             index,
@@ -203,10 +205,6 @@ export default class ReactCarousel extends Component {
             index: index + delta,
             customTransform: undefined
         });
-    }
-
-    moveTo(index) {
-        this._moveTo({ index: index + 1 });
     }
 
     _moveTo(state = {}) {
@@ -292,7 +290,7 @@ export default class ReactCarousel extends Component {
 
         this.stopAutoplay();
 
-        this.autoplayInterval = setInterval(this.next, autoplayDelay);
+        this.autoplayInterval = setInterval(() => this.move(1), autoplayDelay);
     }
 
     handleTouchStart = (e) => {
