@@ -1,4 +1,9 @@
-import React, { Component, Children } from 'react';
+import React, {
+    Component,
+    Children,
+    createRef
+} from 'react';
+import PropTypes from 'prop-types';
 
 const defaultStyles = {
     wrapper: {
@@ -12,18 +17,29 @@ const defaultStyles = {
     }
 };
 
-let mountCounter = 0;
-
 export default class ReactCarousel extends Component {
+    static propTypes = {
+        isInfinity: PropTypes.bool,
+        autoplay: PropTypes.bool,
+        autoplayDelay: PropTypes.number,
+        transitionTimingFunc: PropTypes.string,
+        transitionDelay: PropTypes.number,
+        onTransitionEnd: PropTypes.func,
+        className: PropTypes.string,
+        innerClassName: PropTypes.string,
+        children: PropTypes.node,
+        onMount: PropTypes.func
+    }
+
     static defaultProps = {
-        startSlideIndex: 0,
         isInfinity: false,
         autoplay: false,
-        autoplayDelay: 1000,
+        autoplayDelay: 5000,
         transitionTimingFunc: 'ease',
         transitionDelay: 500,
-        onTransitionEnd: null,
-        className: undefined,
+        onTransitionEnd: undefined,
+        className: '',
+        innerClassName: '',
         children: undefined,
         onMount: () => {}
     }
@@ -31,34 +47,35 @@ export default class ReactCarousel extends Component {
     constructor(...args) {
         super(...args);
 
+        this.handleTransitionEnd = this.handleTransitionEnd.bind(this);
+        this.handleResize = this.handleResize.bind(this);
+        this.handleTouchEnd = this.handleTouchEnd.bind(this);
+        this.handleTouchMove = this.handleTouchMove.bind(this);
+        this.handleTouchStart = this.handleTouchStart.bind(this);
+        this.cloneChild = this.cloneChild.bind(this);
+
         const { children } = this.props;
         const slidesNumbers = Children.count(children);
         const isInfinity = this.props.isInfinity && slidesNumbers > 1;
 
+        this.wrapperRef = createRef();
+
         this.state = {
             isMounted: false,
             customTransform: undefined,
+            realIndex: 0,
             index: isInfinity ? 1 : 0,
             isInfinity,
             slidesNumbers: isInfinity ? slidesNumbers + 2 : slidesNumbers,
-            isTransition: null, //animate moving or not
-            isTransitionInProgress: false,
-            transitionEventName: 'transitionend'
+            isTransition: false, //animate slide move or not
+            isTransitionInProgress: false
         };
     }
 
-    UNSAFE_componentWillMount() {
-        mountCounter += 1;
-        this.wrapperClassName = `js-ref-wrapper-${mountCounter}`;
-        this.innerClassName = `js-ref-inner-${mountCounter}`;
-    }
-
     componentDidMount() {
-        const { transitionEventName } = this.state;
         const { onMount } = this.props;
 
-        this.$wrapper = document.querySelector('.' + this.wrapperClassName);
-        this.$inner = document.querySelector('.' + this.innerClassName);
+        this.$wrapper = this.wrapperRef.current;
 
         this.setState({
             width: this.getWrapperWidth(),
@@ -68,18 +85,17 @@ export default class ReactCarousel extends Component {
         this.initAutoplay();
 
         window.addEventListener('resize', this.handleResize);
-        this.$inner.addEventListener(transitionEventName, this.handleTransitionEnd);
 
         onMount({
             next: () => this.move(1),
             prev: () => this.move(-1),
-            moveTo: index =>  typeof index === 'number'
-                ? this._moveTo({ index: index + 1 })
+            moveTo: index => typeof index === 'number'
+                ? this.moveTo({ index: index + 1 })
                 : undefined
         });
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps, prevState) {
         const {
             index,
             isInfinity,
@@ -96,30 +112,33 @@ export default class ReactCarousel extends Component {
         }
 
         //Silent move to last slide
-        if (index === 0 && !isTransitionInProgress) {
-            this._moveTo({
-                index: slidesNumbers - 2,
-                isTransition: false,
-                isTransitionInProgress: false
-            });
+        if (index === 0 && prevState.isTransitionInProgress && !isTransitionInProgress) {
+            //Add delay for smooth changing from first to last slide in infinity mode
+            setTimeout(() => {
+                this.moveTo({
+                    index: slidesNumbers - 2,
+                    isTransition: false,
+                    isTransitionInProgress: false
+                });
+            }, 17);
         }
 
         //Silent move to first slide
-        if ((slidesNumbers - 1 === index) && !isTransitionInProgress) {
-            this._moveTo({
-                index: 1,
-                isTransition: false,
-                isTransitionInProgress: false
-            });
+        if ((slidesNumbers - 1 === index) && prevState.isTransitionInProgress && !isTransitionInProgress) {
+            //Add delay for smooth changing from last to first slide in infinity mode
+            setTimeout(() => {
+                this.moveTo({
+                    index: 1,
+                    isTransition: false,
+                    isTransitionInProgress: false
+                });
+            }, 17);
         }
     }
 
     componentWillUnmount() {
-        const { transitionEventName } = this.state;
-
         this.stopAutoplay();
         window.removeEventListener('resize', this.handleResize);
-        this.$inner.removeEventListener(transitionEventName, this.handleTransitionEnd);
     }
 
     autoplayInterval = undefined
@@ -147,7 +166,7 @@ export default class ReactCarousel extends Component {
         return width * slidesNumbers;
     }
 
-    cloneChild = (child, props = {}) => {
+    cloneChild(child, props = {}) {
         if (!child) {
             return false;
         }
@@ -179,9 +198,9 @@ export default class ReactCarousel extends Component {
         }
 
         return [
-            this.cloneChild(clonedChildren[clonedChildren.length - 1], {key: 'clonedlast'}),
+            this.cloneChild(clonedChildren[clonedChildren.length - 1], { key: 'clonedlast' }),
             ...clonedChildren,
-            this.cloneChild(clonedChildren[0], {key: 'clonedfirst'})
+            this.cloneChild(clonedChildren[0], { key: 'clonedfirst' })
         ];
     }
 
@@ -201,13 +220,13 @@ export default class ReactCarousel extends Component {
             return false;
         }
 
-        this._moveTo({
+        this.moveTo({
             index: index + delta,
             customTransform: undefined
         });
     }
 
-    _moveTo(state = {}) {
+    moveTo(state = {}) {
         this.initAutoplay();
 
         this.setState(() => ({
@@ -264,12 +283,9 @@ export default class ReactCarousel extends Component {
     }
 
     stopAutoplay() {
-        if (this.autoplayInterval) {
-            this.autoplayInterval = clearInterval(this.autoplayInterval);
-            return true;
-        }
-
-        return false;
+        this.autoplayInterval = this.autoplayInterval
+            ? clearInterval(this.autoplayInterval)
+            : this.autoplayInterval;
     }
 
     initAutoplay() {
@@ -293,7 +309,7 @@ export default class ReactCarousel extends Component {
         this.autoplayInterval = setInterval(() => this.move(1), autoplayDelay);
     }
 
-    handleTouchStart = (e) => {
+    handleTouchStart(e) {
         const { touches } = e;
 
         setTimeout(() => {
@@ -307,7 +323,7 @@ export default class ReactCarousel extends Component {
         };
     }
 
-    handleTouchMove = (e) => {
+    handleTouchMove(e) {
         const {
             touches,
             scale
@@ -334,13 +350,13 @@ export default class ReactCarousel extends Component {
             deltaX: index * width + (this.touchStart.x - x)
         };
 
-        this.setState(() => ({
+        this.setState({
             customTransform: this.touchMove.deltaX,
             isTransition: false
-        }));
+        });
     }
 
-    handleTouchEnd = () => {
+    handleTouchEnd() {
         const {
             index,
             isInfinity,
@@ -349,7 +365,6 @@ export default class ReactCarousel extends Component {
         } = this.state;
         const { deltaX } = this.touchMove;
         const absMove = Math.abs(index * width - deltaX);
-        //const isFirstSlide = index === 0;
         const isLastSlide = (slidesNumbers - (index + 1) === 0);
         const moveDelta = deltaX > index * width ? 1 : -1;
         const handleState = () => ({
@@ -375,32 +390,32 @@ export default class ReactCarousel extends Component {
             }
         }
 
-        // if (!this.isLongTouch || absMove > width / 2) {
-        //     this.move(moveDelta);
-        // } else {
-        //     this.setState(handleState);
-        // }
-
         this.touchStart = {};
         this.touchMove = {};
         this.isLongTouch = false;
     }
 
-    handleResize = () => {
-        this.setState(() => ({ width: this.getWrapperWidth() }));
+    handleResize() {
+        this.setState({ width: this.getWrapperWidth() });
     }
 
-    handleTransitionEnd = () => {
+    handleTransitionEnd() {
         const { onTransitionEnd } = this.props;
         const index = this.getRealIndex();
 
-        this.setState(() => ({ isTransitionInProgress: false }));
+        this.setState({
+            isTransitionInProgress: false,
+            realIndex: index
+        });
 
         typeof onTransitionEnd === 'function' && onTransitionEnd({ index });
     }
 
     render() {
-        const { className = '' } = this.props;
+        const {
+            className,
+            innerClassName
+        } = this.props;
         const {
             isMounted,
             customTransform
@@ -413,15 +428,15 @@ export default class ReactCarousel extends Component {
         const innerWidth = this.getInnerWidth();
         const transformStyles = this.calcTransform(customTransform);
         const animationStyles = this.calcAnimation();
-        const componentClassName = `${className} ${this.wrapperClassName}`;
 
         return (
             <div
-                className={componentClassName}
+                className={className}
                 style={wrapper}
                 onTouchStart={this.handleTouchStart}
                 onTouchMove={this.handleTouchMove}
                 onTouchEnd={this.handleTouchEnd}
+                ref={this.wrapperRef}
             >
                 <div
                     style={{
@@ -430,7 +445,8 @@ export default class ReactCarousel extends Component {
                         ...transformStyles,
                         ...animationStyles
                     }}
-                    className={this.innerClassName}
+                    className={innerClassName}
+                    onTransitionEnd={this.handleTransitionEnd}
                 >
                     { children }
                 </div>

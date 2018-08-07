@@ -1,0 +1,99 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Carousel /> should matches the snapshot 1`] = `
+<ReactCarousel
+  autoplay={false}
+  autoplayDelay={5000}
+  className="c-carousel"
+  innerClassName="c-carousel__inner"
+  isInfinity={true}
+  onMount={[Function]}
+  transitionDelay={500}
+  transitionTimingFunc="ease"
+>
+  <div
+    className="c-carousel"
+    onTouchEnd={[Function]}
+    onTouchMove={[Function]}
+    onTouchStart={[Function]}
+    style={
+      Object {
+        "overflow": "hidden",
+      }
+    }
+  >
+    <div
+      className="c-carousel__inner"
+      onTransitionEnd={[Function]}
+      style={
+        Object {
+          "overflow": "hidden",
+          "transform": "translate3d(-0px, 0, 0)",
+          "width": null,
+        }
+      }
+    >
+      <div
+        key="clonedlast"
+        style={
+          Object {
+            "float": "left",
+            "height": 250,
+            "width": 500,
+          }
+        }
+      >
+        Slide
+      </div>
+      <div
+        key=".0"
+        style={
+          Object {
+            "float": "left",
+            "height": 250,
+            "width": 500,
+          }
+        }
+      >
+        Slide
+      </div>
+      <div
+        key=".1"
+        style={
+          Object {
+            "float": "left",
+            "height": 250,
+            "width": 500,
+          }
+        }
+      >
+        Slide
+      </div>
+      <div
+        key=".2"
+        style={
+          Object {
+            "float": "left",
+            "height": 250,
+            "width": 500,
+          }
+        }
+      >
+        Slide
+      </div>
+      <div
+        key="clonedfirst"
+        style={
+          Object {
+            "float": "left",
+            "height": 250,
+            "width": 500,
+          }
+        }
+      >
+        Slide
+      </div>
+    </div>
+  </div>
+</ReactCarousel>
+`;

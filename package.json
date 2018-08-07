@@ -1,8 +1,8 @@
 {
     "author": "Serhey Shmyg",
     "name": "react-plain-carousel",
-    "version": "1.0.4",
-    "homepage": "https://github.com/serheyShmyg/",
+    "version": "1.1.0",
+    "homepage": "https://github.com/serheyShmyg",
     "license": "ISC",
     "main": "./dist/index.js",
     "repository": {
@@ -14,6 +14,8 @@
         "demo": "npx webpack-dev-server --progress",
         "clear": "rm -rf dist node_modules",
         "build": "NODE_ENV=production npx babel ./src --out-dir ./dist",
+        "test": "npx jest --coverage",
+        "test:watch": "npx jest --watch --coverage",
         "prepublish": "npm run build"
     },
     "keywords": [
@@ -23,7 +25,7 @@
         "react-carousel"
     ],
     "engines": {
-        "npm" : ">=5.2.0"
+        "npm": ">=5.2.0"
     },
     "devDependencies": {
         "babel-cli": "^6.26.0",
@@ -38,14 +40,20 @@
         "babel-preset-stage-0": "^6.24.1",
         "babel-preset-stage-1": "^6.24.1",
         "babel-preset-stage-2": "^6.24.1",
-        "react": "^16.4.1",
-        "react-dom": "^16.4.1",
-        "webpack": "^4.16.3",
+        "enzyme": "3.3.0",
+        "enzyme-adapter-react-16": "1.1.1",
+        "enzyme-to-json": "3.3.4",
+        "jest": "23.4.2",
+        "prop-types": "15.6.2",
+        "react": "^16.4.2",
+        "react-dom": "^16.4.2",
+        "webpack": "^4.16.5",
         "webpack-cli": "3.1.0",
         "webpack-dev-server": "^3.1.5"
     },
     "peerDependencies": {
-        "react": "^16.4.1",
-        "react-dom": "^16.4.1"
+        "react": "^16.4.2",
+        "react-dom": "^16.4.2",
+        "prop-types": "15.6.2"
     }
 }

@@ -1,12 +1,12 @@
 # React plain carousel
 Simple, small carousel for everyday usage 😜
+Works fine on mobile with swipes.
 
 [Demo](https://codesandbox.io/s/q9wnyvrozq)
 
 ## Props
 ```javascript
 {
-    startSlideIndex: PropTypes.number,
     isInfinity: PropTypes.bool,
     autoplay: PropTypes.bool,
     autoplayDelay: PropTypes.number,
@@ -14,6 +14,8 @@ Simple, small carousel for everyday usage 😜
     transitionDelay: PropTypes.number,
     onTransitionEnd: PropTypes.func,
     className: PropTypes.string,
-    children: PropTypes.node
+    innerClassName: PropTypes.string,
+    children: PropTypes.node,
+    onMount: PropTypes.func
 }
 ```

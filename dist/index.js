@@ -5,8 +5,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = undefined;
 
-var _jsx = function () { var REACT_ELEMENT_TYPE = typeof Symbol === "function" && Symbol.for && Symbol.for("react.element") || 0xeac7; return function createRawReactElement(type, props, key, children) { var defaultProps = type && type.defaultProps; var childrenLength = arguments.length - 3; if (!props && childrenLength !== 0) { props = {}; } if (props && defaultProps) { for (var propName in defaultProps) { if (props[propName] === void 0) { props[propName] = defaultProps[propName]; } } } else if (!props) { props = defaultProps || {}; } if (childrenLength === 1) { props.children = children; } else if (childrenLength > 1) { var childArray = Array(childrenLength); for (var i = 0; i < childrenLength; i++) { childArray[i] = arguments[i + 3]; } props.children = childArray; } return { $$typeof: REACT_ELEMENT_TYPE, type: type, key: key === undefined ? null : '' + key, ref: null, props: props, _owner: null }; }; }();
-
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -39,8 +37,6 @@ var defaultStyles = {
     }
 };
 
-var mountCounter = 0;
-
 var ReactCarousel = (_temp = _class = function (_Component) {
     _inherits(ReactCarousel, _Component);
 
@@ -62,6 +58,9 @@ var ReactCarousel = (_temp = _class = function (_Component) {
         var slidesNumbers = _react.Children.count(children);
         var isInfinity = _this.props.isInfinity && slidesNumbers > 1;
 
+        _this.wrapperRef = (0, _react.createRef)();
+        _this.innerRef = (0, _react.createRef)();
+
         _this.state = {
             isMounted: false,
             customTransform: undefined,
@@ -76,20 +75,16 @@ var ReactCarousel = (_temp = _class = function (_Component) {
     }
 
     _createClass(ReactCarousel, [{
-        key: 'UNSAFE_componentWillMount',
-        value: function UNSAFE_componentWillMount() {
-            mountCounter += 1;
-            this.wrapperClassName = 'js-ref-wrapper-' + mountCounter;
-            this.innerClassName = 'js-ref-inner-' + mountCounter;
-        }
-    }, {
         key: 'componentDidMount',
         value: function componentDidMount() {
+            var _this2 = this;
+
             var transitionEventName = this.state.transitionEventName;
+            var onMount = this.props.onMount;
 
 
-            this.$wrapper = document.querySelector('.' + this.wrapperClassName);
-            this.$inner = document.querySelector('.' + this.innerClassName);
+            this.$wrapper = this.wrapperRef.current;
+            this.$inner = this.innerRef.current;
 
             this.setState({
                 width: this.getWrapperWidth(),
@@ -100,10 +95,24 @@ var ReactCarousel = (_temp = _class = function (_Component) {
 
             window.addEventListener('resize', this.handleResize);
             this.$inner.addEventListener(transitionEventName, this.handleTransitionEnd);
+
+            onMount({
+                next: function next() {
+                    return _this2.move(1);
+                },
+                prev: function prev() {
+                    return _this2.move(-1);
+                },
+                moveTo: function moveTo(index) {
+                    return typeof index === 'number' ? _this2._moveTo({ index: index + 1 }) : undefined;
+                }
+            });
         }
     }, {
         key: 'componentDidUpdate',
-        value: function componentDidUpdate() {
+        value: function componentDidUpdate(prevProps, prevState) {
+            var _this3 = this;
+
             var _state = this.state,
                 index = _state.index,
                 isInfinity = _state.isInfinity,
@@ -120,21 +129,27 @@ var ReactCarousel = (_temp = _class = function (_Component) {
             }
 
             //Silent move to last slide
-            if (index === 0 && !isTransitionInProgress) {
-                this._moveTo({
-                    index: slidesNumbers - 2,
-                    isTransition: false,
-                    isTransitionInProgress: false
-                });
+            if (index === 0 && prevState.isTransitionInProgress && !isTransitionInProgress) {
+                //Add delay for smooth changing from first to last slide in infinity mode
+                setTimeout(function () {
+                    _this3._moveTo({
+                        index: slidesNumbers - 2,
+                        isTransition: false,
+                        isTransitionInProgress: false
+                    });
+                }, 17);
             }
 
             //Silent move to first slide
-            if (slidesNumbers - 1 === index && !isTransitionInProgress) {
-                this._moveTo({
-                    index: 1,
-                    isTransition: false,
-                    isTransitionInProgress: false
-                });
+            if (slidesNumbers - 1 === index && prevState.isTransitionInProgress && !isTransitionInProgress) {
+                //Add delay for smooth changing from last to first slide in infinity mode
+                setTimeout(function () {
+                    _this3._moveTo({
+                        index: 1,
+                        isTransition: false,
+                        isTransitionInProgress: false
+                    });
+                }, 17);
             }
         }
     }, {
@@ -198,11 +213,6 @@ var ReactCarousel = (_temp = _class = function (_Component) {
                 index: index + delta,
                 customTransform: undefined
             });
-        }
-    }, {
-        key: 'moveTo',
-        value: function moveTo(index) {
-            this._moveTo({ index: index + 1 });
         }
     }, {
         key: '_moveTo',
@@ -281,6 +291,8 @@ var ReactCarousel = (_temp = _class = function (_Component) {
     }, {
         key: 'initAutoplay',
         value: function initAutoplay() {
+            var _this4 = this;
+
             var _props2 = this.props,
                 autoplayDelay = _props2.autoplayDelay,
                 transitionDelay = _props2.transitionDelay,
@@ -298,7 +310,9 @@ var ReactCarousel = (_temp = _class = function (_Component) {
 
             this.stopAutoplay();
 
-            this.autoplayInterval = setInterval(this.next, autoplayDelay);
+            this.autoplayInterval = setInterval(function () {
+                return _this4.move(1);
+            }, autoplayDelay);
         }
     }, {
         key: 'render',
@@ -315,20 +329,28 @@ var ReactCarousel = (_temp = _class = function (_Component) {
             var innerWidth = this.getInnerWidth();
             var transformStyles = this.calcTransform(customTransform);
             var animationStyles = this.calcAnimation();
-            var componentClassName = className + ' ' + this.wrapperClassName;
 
-            return _jsx('div', {
-                className: componentClassName,
-                style: wrapper,
-                onTouchStart: this.handleTouchStart,
-                onTouchMove: this.handleTouchMove,
-                onTouchEnd: this.handleTouchEnd
-            }, void 0, _jsx('div', {
-                style: _extends({}, inner, {
-                    width: innerWidth
-                }, transformStyles, animationStyles),
-                className: this.innerClassName
-            }, void 0, children));
+            return _react2.default.createElement(
+                'div',
+                {
+                    className: className,
+                    style: wrapper,
+                    onTouchStart: this.handleTouchStart,
+                    onTouchMove: this.handleTouchMove,
+                    onTouchEnd: this.handleTouchEnd,
+                    ref: this.wrapperRef
+                },
+                _react2.default.createElement(
+                    'div',
+                    {
+                        style: _extends({}, inner, {
+                            width: innerWidth
+                        }, transformStyles, animationStyles),
+                        ref: this.innerRef
+                    },
+                    children
+                )
+            );
         }
     }]);
 
@@ -342,9 +364,10 @@ var ReactCarousel = (_temp = _class = function (_Component) {
     transitionDelay: 500,
     onTransitionEnd: null,
     className: undefined,
-    children: undefined
+    children: undefined,
+    onMount: function onMount() {}
 }, _initialiseProps = function _initialiseProps() {
-    var _this2 = this;
+    var _this5 = this;
 
     this.autoplayInterval = undefined;
     this.touchStart = {};
@@ -358,7 +381,7 @@ var ReactCarousel = (_temp = _class = function (_Component) {
             return false;
         }
 
-        var width = _this2.state.width;
+        var width = _this5.state.width;
 
 
         var slide = _extends({}, defaultStyles.slide, {
@@ -370,23 +393,15 @@ var ReactCarousel = (_temp = _class = function (_Component) {
         }, props));
     };
 
-    this.next = function () {
-        _this2.move(1);
-    };
-
-    this.prev = function () {
-        _this2.move(-1);
-    };
-
     this.handleTouchStart = function (e) {
         var touches = e.touches;
 
 
         setTimeout(function () {
-            _this2.isLongTouch = true;
+            _this5.isLongTouch = true;
         }, 250);
 
-        _this2.touchStart = {
+        _this5.touchStart = {
             x: touches[0].pageX,
             y: touches[0].pageY,
             time: +new Date()
@@ -396,7 +411,7 @@ var ReactCarousel = (_temp = _class = function (_Component) {
     this.handleTouchMove = function (e) {
         var touches = e.touches,
             scale = e.scale;
-        var _state7 = _this2.state,
+        var _state7 = _this5.state,
             index = _state7.index,
             width = _state7.width;
 
@@ -411,28 +426,28 @@ var ReactCarousel = (_temp = _class = function (_Component) {
         var x = touches[0].pageX;
         var y = touches[0].pageY;
 
-        _this2.touchMove = {
+        _this5.touchMove = {
             x: x,
             y: y,
             time: +new Date(),
-            deltaX: index * width + (_this2.touchStart.x - x)
+            deltaX: index * width + (_this5.touchStart.x - x)
         };
 
-        _this2.setState(function () {
+        _this5.setState(function () {
             return {
-                customTransform: _this2.touchMove.deltaX,
+                customTransform: _this5.touchMove.deltaX,
                 isTransition: false
             };
         });
     };
 
     this.handleTouchEnd = function () {
-        var _state8 = _this2.state,
+        var _state8 = _this5.state,
             index = _state8.index,
             isInfinity = _state8.isInfinity,
             width = _state8.width,
             slidesNumbers = _state8.slidesNumbers;
-        var deltaX = _this2.touchMove.deltaX;
+        var deltaX = _this5.touchMove.deltaX;
 
         var absMove = Math.abs(index * width - deltaX);
         //const isFirstSlide = index === 0;
@@ -446,20 +461,20 @@ var ReactCarousel = (_temp = _class = function (_Component) {
         };
 
         if (!isInfinity) {
-            if (!_this2.isLongTouch || absMove > width / 2) {
+            if (!_this5.isLongTouch || absMove > width / 2) {
                 if (isLastSlide && moveDelta === 1) {
-                    _this2.setState(handleState);
+                    _this5.setState(handleState);
                 } else {
-                    _this2.move(moveDelta);
+                    _this5.move(moveDelta);
                 }
             } else {
-                _this2.setState(handleState);
+                _this5.setState(handleState);
             }
         } else {
-            if (!_this2.isLongTouch || absMove > width / 2) {
-                _this2.move(moveDelta);
+            if (!_this5.isLongTouch || absMove > width / 2) {
+                _this5.move(moveDelta);
             } else {
-                _this2.setState(handleState);
+                _this5.setState(handleState);
             }
         }
 
@@ -469,25 +484,23 @@ var ReactCarousel = (_temp = _class = function (_Component) {
         //     this.setState(handleState);
         // }
 
-        _this2.touchStart = {};
-        _this2.touchMove = {};
-        _this2.isLongTouch = false;
+        _this5.touchStart = {};
+        _this5.touchMove = {};
+        _this5.isLongTouch = false;
     };
 
     this.handleResize = function () {
-        _this2.setState(function () {
-            return { width: _this2.getWrapperWidth() };
+        _this5.setState(function () {
+            return { width: _this5.getWrapperWidth() };
         });
     };
 
     this.handleTransitionEnd = function () {
-        var onTransitionEnd = _this2.props.onTransitionEnd;
+        var onTransitionEnd = _this5.props.onTransitionEnd;
 
-        var index = _this2.getRealIndex();
+        var index = _this5.getRealIndex();
 
-        _this2.setState(function () {
-            return { isTransitionInProgress: false };
-        });
+        _this5.setState({ isTransitionInProgress: false });
 
         typeof onTransitionEnd === 'function' && onTransitionEnd({ index: index });
     };
