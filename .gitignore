@@ -10,6 +10,5 @@ Thumbs.db
 node_modules/*
 .sass-cache
 notes.md
-
-#dist/
-
+dist/demo.js
+dist/index.test.js

@@ -2,7 +2,7 @@
 Simple, small carousel for everyday usage 😜
 Works fine on mobile with swipes.
 
-[Demo](https://codesandbox.io/s/q9wnyvrozq)
+[Demo](https://q9wnyvrozq.codesandbox.io/)
 
 ## Props
 ```javascript

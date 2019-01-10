@@ -5,15 +5,21 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = undefined;
 
+var _jsx = function () { var REACT_ELEMENT_TYPE = typeof Symbol === "function" && Symbol.for && Symbol.for("react.element") || 0xeac7; return function createRawReactElement(type, props, key, children) { var defaultProps = type && type.defaultProps; var childrenLength = arguments.length - 3; if (!props && childrenLength !== 0) { props = {}; } if (props && defaultProps) { for (var propName in defaultProps) { if (props[propName] === void 0) { props[propName] = defaultProps[propName]; } } } else if (!props) { props = defaultProps || {}; } if (childrenLength === 1) { props.children = children; } else if (childrenLength > 1) { var childArray = Array(childrenLength); for (var i = 0; i < childrenLength; i++) { childArray[i] = arguments[i + 3]; } props.children = childArray; } return { $$typeof: REACT_ELEMENT_TYPE, type: type, key: key === undefined ? null : '' + key, ref: null, props: props, _owner: null }; }; }();
+
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _class, _temp, _initialiseProps;
+var _class, _temp;
 
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -51,7 +57,18 @@ var ReactCarousel = (_temp = _class = function (_Component) {
 
         var _this = _possibleConstructorReturn(this, (_ref = ReactCarousel.__proto__ || Object.getPrototypeOf(ReactCarousel)).call.apply(_ref, [this].concat(args)));
 
-        _initialiseProps.call(_this);
+        _this.autoplayInterval = undefined;
+        _this.touchStart = {};
+        _this.touchMove = {};
+        _this.isLongTouch = false;
+
+
+        _this.handleTransitionEnd = _this.handleTransitionEnd.bind(_this);
+        _this.handleResize = _this.handleResize.bind(_this);
+        _this.handleTouchEnd = _this.handleTouchEnd.bind(_this);
+        _this.handleTouchMove = _this.handleTouchMove.bind(_this);
+        _this.handleTouchStart = _this.handleTouchStart.bind(_this);
+        _this.cloneChild = _this.cloneChild.bind(_this);
 
         var children = _this.props.children;
 
@@ -59,17 +76,16 @@ var ReactCarousel = (_temp = _class = function (_Component) {
         var isInfinity = _this.props.isInfinity && slidesNumbers > 1;
 
         _this.wrapperRef = (0, _react.createRef)();
-        _this.innerRef = (0, _react.createRef)();
 
         _this.state = {
             isMounted: false,
             customTransform: undefined,
+            realIndex: 0,
             index: isInfinity ? 1 : 0,
             isInfinity: isInfinity,
             slidesNumbers: isInfinity ? slidesNumbers + 2 : slidesNumbers,
-            isTransition: null, //animate moving or not
-            isTransitionInProgress: false,
-            transitionEventName: 'transitionend'
+            isTransition: false, //animate slide move or not
+            isTransitionInProgress: false
         };
         return _this;
     }
@@ -79,12 +95,10 @@ var ReactCarousel = (_temp = _class = function (_Component) {
         value: function componentDidMount() {
             var _this2 = this;
 
-            var transitionEventName = this.state.transitionEventName;
             var onMount = this.props.onMount;
 
 
             this.$wrapper = this.wrapperRef.current;
-            this.$inner = this.innerRef.current;
 
             this.setState({
                 width: this.getWrapperWidth(),
@@ -94,7 +108,6 @@ var ReactCarousel = (_temp = _class = function (_Component) {
             this.initAutoplay();
 
             window.addEventListener('resize', this.handleResize);
-            this.$inner.addEventListener(transitionEventName, this.handleTransitionEnd);
 
             onMount({
                 next: function next() {
@@ -104,7 +117,7 @@ var ReactCarousel = (_temp = _class = function (_Component) {
                     return _this2.move(-1);
                 },
                 moveTo: function moveTo(index) {
-                    return typeof index === 'number' ? _this2._moveTo({ index: index + 1 }) : undefined;
+                    return typeof index === 'number' ? _this2.moveTo({ index: index + 1 }) : undefined;
                 }
             });
         }
@@ -132,7 +145,7 @@ var ReactCarousel = (_temp = _class = function (_Component) {
             if (index === 0 && prevState.isTransitionInProgress && !isTransitionInProgress) {
                 //Add delay for smooth changing from first to last slide in infinity mode
                 setTimeout(function () {
-                    _this3._moveTo({
+                    _this3.moveTo({
                         index: slidesNumbers - 2,
                         isTransition: false,
                         isTransitionInProgress: false
@@ -144,7 +157,7 @@ var ReactCarousel = (_temp = _class = function (_Component) {
             if (slidesNumbers - 1 === index && prevState.isTransitionInProgress && !isTransitionInProgress) {
                 //Add delay for smooth changing from last to first slide in infinity mode
                 setTimeout(function () {
-                    _this3._moveTo({
+                    _this3.moveTo({
                         index: 1,
                         isTransition: false,
                         isTransitionInProgress: false
@@ -155,12 +168,8 @@ var ReactCarousel = (_temp = _class = function (_Component) {
     }, {
         key: 'componentWillUnmount',
         value: function componentWillUnmount() {
-            var transitionEventName = this.state.transitionEventName;
-
-
             this.stopAutoplay();
             window.removeEventListener('resize', this.handleResize);
-            this.$inner.removeEventListener(transitionEventName, this.handleTransitionEnd);
         }
     }, {
         key: 'getWrapperWidth',
@@ -180,6 +189,26 @@ var ReactCarousel = (_temp = _class = function (_Component) {
             }
 
             return width * slidesNumbers;
+        }
+    }, {
+        key: 'cloneChild',
+        value: function cloneChild(child) {
+            var props = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+            if (!child) {
+                return false;
+            }
+
+            var width = this.state.width;
+
+
+            var slide = _extends({}, defaultStyles.slide, {
+                width: width
+            });
+
+            return _react2.default.cloneElement(child, _extends({
+                style: _extends({}, slide, child.props.style || {})
+            }, props));
         }
     }, {
         key: 'getChildren',
@@ -209,14 +238,14 @@ var ReactCarousel = (_temp = _class = function (_Component) {
                 return false;
             }
 
-            this._moveTo({
+            this.moveTo({
                 index: index + delta,
                 customTransform: undefined
             });
         }
     }, {
-        key: '_moveTo',
-        value: function _moveTo() {
+        key: 'moveTo',
+        value: function moveTo() {
             var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
             this.initAutoplay();
@@ -281,12 +310,7 @@ var ReactCarousel = (_temp = _class = function (_Component) {
     }, {
         key: 'stopAutoplay',
         value: function stopAutoplay() {
-            if (this.autoplayInterval) {
-                this.autoplayInterval = clearInterval(this.autoplayInterval);
-                return true;
-            }
-
-            return false;
+            this.autoplayInterval = this.autoplayInterval ? clearInterval(this.autoplayInterval) : this.autoplayInterval;
         }
     }, {
         key: 'initAutoplay',
@@ -315,13 +339,125 @@ var ReactCarousel = (_temp = _class = function (_Component) {
             }, autoplayDelay);
         }
     }, {
+        key: 'handleTouchStart',
+        value: function handleTouchStart(e) {
+            var _this5 = this;
+
+            var touches = e.touches;
+
+
+            setTimeout(function () {
+                _this5.isLongTouch = true;
+            }, 250);
+
+            this.touchStart = {
+                x: touches[0].pageX,
+                y: touches[0].pageY,
+                time: +new Date()
+            };
+        }
+    }, {
+        key: 'handleTouchMove',
+        value: function handleTouchMove(e) {
+            var touches = e.touches,
+                scale = e.scale;
+            var _state6 = this.state,
+                index = _state6.index,
+                width = _state6.width;
+
+            // ensure swiping with one touch and not pinching
+
+            if (touches.length > 1 || scale && scale !== 1) {
+                return;
+            }
+
+            //e.preventDefault();
+
+            var x = touches[0].pageX;
+            var y = touches[0].pageY;
+
+            this.touchMove = {
+                x: x,
+                y: y,
+                time: +new Date(),
+                deltaX: index * width + (this.touchStart.x - x)
+            };
+
+            this.setState({
+                customTransform: this.touchMove.deltaX,
+                isTransition: false
+            });
+        }
+    }, {
+        key: 'handleTouchEnd',
+        value: function handleTouchEnd() {
+            var _state7 = this.state,
+                index = _state7.index,
+                isInfinity = _state7.isInfinity,
+                width = _state7.width,
+                slidesNumbers = _state7.slidesNumbers;
+            var deltaX = this.touchMove.deltaX;
+
+            var absMove = Math.abs(index * width - deltaX);
+            var isLastSlide = slidesNumbers - (index + 1) === 0;
+            var moveDelta = deltaX > index * width ? 1 : -1;
+            var handleState = function handleState() {
+                return {
+                    customTransform: undefined,
+                    isTransition: true
+                };
+            };
+
+            if (!isInfinity) {
+                if (!this.isLongTouch || absMove > width / 2) {
+                    if (isLastSlide && moveDelta === 1) {
+                        this.setState(handleState);
+                    } else {
+                        this.move(moveDelta);
+                    }
+                } else {
+                    this.setState(handleState);
+                }
+            } else {
+                if (!this.isLongTouch || absMove > width / 2) {
+                    this.move(moveDelta);
+                } else {
+                    this.setState(handleState);
+                }
+            }
+
+            this.touchStart = {};
+            this.touchMove = {};
+            this.isLongTouch = false;
+        }
+    }, {
+        key: 'handleResize',
+        value: function handleResize() {
+            this.setState({ width: this.getWrapperWidth() });
+        }
+    }, {
+        key: 'handleTransitionEnd',
+        value: function handleTransitionEnd() {
+            var onTransitionEnd = this.props.onTransitionEnd;
+
+            var index = this.getRealIndex();
+
+            this.setState({
+                isTransitionInProgress: false,
+                realIndex: index
+            });
+
+            typeof onTransitionEnd === 'function' && onTransitionEnd({ index: index });
+        }
+    }, {
         key: 'render',
         value: function render() {
-            var _props$className = this.props.className,
-                className = _props$className === undefined ? '' : _props$className;
-            var _state6 = this.state,
-                isMounted = _state6.isMounted,
-                customTransform = _state6.customTransform;
+            var _props3 = this.props,
+                className = _props3.className,
+                innerClassName = _props3.innerClassName;
+            var _state8 = this.state,
+                isMounted = _state8.isMounted,
+                customTransform = _state8.customTransform;
             var wrapper = defaultStyles.wrapper,
                 inner = defaultStyles.inner;
 
@@ -340,169 +476,28 @@ var ReactCarousel = (_temp = _class = function (_Component) {
                     onTouchEnd: this.handleTouchEnd,
                     ref: this.wrapperRef
                 },
-                _react2.default.createElement(
-                    'div',
-                    {
-                        style: _extends({}, inner, {
-                            width: innerWidth
-                        }, transformStyles, animationStyles),
-                        ref: this.innerRef
-                    },
-                    children
-                )
+                _jsx('div', {
+                    style: _extends({}, inner, {
+                        width: innerWidth
+                    }, transformStyles, animationStyles),
+                    className: innerClassName,
+                    onTransitionEnd: this.handleTransitionEnd
+                }, void 0, children)
             );
         }
     }]);
 
     return ReactCarousel;
 }(_react.Component), _class.defaultProps = {
-    startSlideIndex: 0,
     isInfinity: false,
     autoplay: false,
-    autoplayDelay: 1000,
+    autoplayDelay: 5000,
     transitionTimingFunc: 'ease',
     transitionDelay: 500,
-    onTransitionEnd: null,
-    className: undefined,
+    onTransitionEnd: undefined,
+    className: '',
+    innerClassName: '',
     children: undefined,
     onMount: function onMount() {}
-}, _initialiseProps = function _initialiseProps() {
-    var _this5 = this;
-
-    this.autoplayInterval = undefined;
-    this.touchStart = {};
-    this.touchMove = {};
-    this.isLongTouch = false;
-
-    this.cloneChild = function (child) {
-        var props = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-        if (!child) {
-            return false;
-        }
-
-        var width = _this5.state.width;
-
-
-        var slide = _extends({}, defaultStyles.slide, {
-            width: width
-        });
-
-        return _react2.default.cloneElement(child, _extends({
-            style: _extends({}, slide, child.props.style || {})
-        }, props));
-    };
-
-    this.handleTouchStart = function (e) {
-        var touches = e.touches;
-
-
-        setTimeout(function () {
-            _this5.isLongTouch = true;
-        }, 250);
-
-        _this5.touchStart = {
-            x: touches[0].pageX,
-            y: touches[0].pageY,
-            time: +new Date()
-        };
-    };
-
-    this.handleTouchMove = function (e) {
-        var touches = e.touches,
-            scale = e.scale;
-        var _state7 = _this5.state,
-            index = _state7.index,
-            width = _state7.width;
-
-        // ensure swiping with one touch and not pinching
-
-        if (touches.length > 1 || scale && scale !== 1) {
-            return;
-        }
-
-        //e.preventDefault();
-
-        var x = touches[0].pageX;
-        var y = touches[0].pageY;
-
-        _this5.touchMove = {
-            x: x,
-            y: y,
-            time: +new Date(),
-            deltaX: index * width + (_this5.touchStart.x - x)
-        };
-
-        _this5.setState(function () {
-            return {
-                customTransform: _this5.touchMove.deltaX,
-                isTransition: false
-            };
-        });
-    };
-
-    this.handleTouchEnd = function () {
-        var _state8 = _this5.state,
-            index = _state8.index,
-            isInfinity = _state8.isInfinity,
-            width = _state8.width,
-            slidesNumbers = _state8.slidesNumbers;
-        var deltaX = _this5.touchMove.deltaX;
-
-        var absMove = Math.abs(index * width - deltaX);
-        //const isFirstSlide = index === 0;
-        var isLastSlide = slidesNumbers - (index + 1) === 0;
-        var moveDelta = deltaX > index * width ? 1 : -1;
-        var handleState = function handleState() {
-            return {
-                customTransform: undefined,
-                isTransition: true
-            };
-        };
-
-        if (!isInfinity) {
-            if (!_this5.isLongTouch || absMove > width / 2) {
-                if (isLastSlide && moveDelta === 1) {
-                    _this5.setState(handleState);
-                } else {
-                    _this5.move(moveDelta);
-                }
-            } else {
-                _this5.setState(handleState);
-            }
-        } else {
-            if (!_this5.isLongTouch || absMove > width / 2) {
-                _this5.move(moveDelta);
-            } else {
-                _this5.setState(handleState);
-            }
-        }
-
-        // if (!this.isLongTouch || absMove > width / 2) {
-        //     this.move(moveDelta);
-        // } else {
-        //     this.setState(handleState);
-        // }
-
-        _this5.touchStart = {};
-        _this5.touchMove = {};
-        _this5.isLongTouch = false;
-    };
-
-    this.handleResize = function () {
-        _this5.setState(function () {
-            return { width: _this5.getWrapperWidth() };
-        });
-    };
-
-    this.handleTransitionEnd = function () {
-        var onTransitionEnd = _this5.props.onTransitionEnd;
-
-        var index = _this5.getRealIndex();
-
-        _this5.setState({ isTransitionInProgress: false });
-
-        typeof onTransitionEnd === 'function' && onTransitionEnd({ index: index });
-    };
 }, _temp);
 exports.default = ReactCarousel;
