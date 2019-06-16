@@ -3,7 +3,6 @@ import React, {
     Children,
     createRef
 } from 'react';
-import PropTypes from 'prop-types';
 
 const defaultStyles = {
     wrapper: {
@@ -18,7 +17,7 @@ const defaultStyles = {
 };
 
 export default class ReactCarousel extends Component {
-    static propTypes = {
+    /* static propTypes = {
         isInfinity: PropTypes.bool,
         autoplay: PropTypes.bool,
         autoplayDelay: PropTypes.number,
@@ -29,7 +28,7 @@ export default class ReactCarousel extends Component {
         innerClassName: PropTypes.string,
         children: PropTypes.node,
         onMount: PropTypes.func
-    }
+    } */
 
     static defaultProps = {
         isInfinity: false,

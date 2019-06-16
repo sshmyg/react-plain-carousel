@@ -7,8 +7,9 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
-node_modules/*
+node_modules
 .sass-cache
 notes.md
-dist/demo.js
-dist/index.test.js
+coverage
+yarn.lock
+package-lock.json
