@@ -7,6 +7,7 @@ exports[`<Carousel /> should matches the snapshot 1`] = `
   className="c-carousel"
   innerClassName="c-carousel__inner"
   isInfinity={true}
+  longTouchDelay={250}
   onMount={[Function]}
   transitionDelay={500}
   transitionTimingFunc="ease"

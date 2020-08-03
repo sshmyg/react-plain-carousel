@@ -10,6 +10,7 @@ Works fine on mobile with swipes.
     isInfinity: PropTypes.bool,
     autoplay: PropTypes.bool,
     autoplayDelay: PropTypes.number,
+    longTouchDelay: PropTypes.number,
     transitionTimingFunc: PropTypes.string,
     transitionDelay: PropTypes.number,
     onTransitionEnd: PropTypes.func,
