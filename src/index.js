@@ -23,11 +23,12 @@ export default class ReactCarousel extends Component {
         autoplayDelay: PropTypes.number,
         transitionTimingFunc: PropTypes.string,
         transitionDelay: PropTypes.number,
+        longTouchDelay: PropTypes.number,
         onTransitionEnd: PropTypes.func,
         className: PropTypes.string,
         innerClassName: PropTypes.string,
         children: PropTypes.node,
-        onMount: PropTypes.func
+        onMount: PropTypes.func,
     } */
 
     static defaultProps = {
@@ -36,6 +37,7 @@ export default class ReactCarousel extends Component {
         autoplayDelay: 5000,
         transitionTimingFunc: 'ease',
         transitionDelay: 500,
+        longTouchDelay: 250,
         onTransitionEnd: undefined,
         className: '',
         innerClassName: '',
@@ -313,7 +315,7 @@ export default class ReactCarousel extends Component {
 
         setTimeout(() => {
             this.isLongTouch = true;
-        }, 250);
+        }, this.props.longTouchDelay);
 
         this.touchStart = {
             x: touches[0].pageX,
