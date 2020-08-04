@@ -1,7 +1,7 @@
 {
     "author": "Serhey Shmyg",
     "name": "react-plain-carousel",
-    "version": "1.3.0",
+    "version": "1.3.1",
     "homepage": "https://github.com/serheyShmyg",
     "license": "ISC",
     "main": "dest/react-plain-carousel.js",

@@ -18,18 +18,18 @@ const defaultStyles = {
 
 export default class ReactCarousel extends Component {
     /* static propTypes = {
-        isInfinity: PropTypes.bool,
         autoplay: PropTypes.bool,
         autoplayDelay: PropTypes.number,
-        transitionTimingFunc: PropTypes.string,
-        transitionDelay: PropTypes.number,
         longTouchDelay: PropTypes.number,
         touchThreshold: : PropTypes.number,
-        onTransitionEnd: PropTypes.func,
+        transitionDelay: PropTypes.number,
+        transitionTimingFunc: PropTypes.string,
+        children: PropTypes.node,
         className: PropTypes.string,
         innerClassName: PropTypes.string,
-        children: PropTypes.node,
-        onMount: PropTypes.func,
+        isInfinity: PropTypes.bool,
+        onTransitionEnd: PropTypes.func,
+        onMount: PropTypes.func
     } */
 
     static defaultProps = {
