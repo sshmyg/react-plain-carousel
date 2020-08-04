@@ -11,6 +11,7 @@ Works fine on mobile with swipes.
     autoplay: PropTypes.bool,
     autoplayDelay: PropTypes.number,
     longTouchDelay: PropTypes.number,
+    touchThreshold: PropTypes.number,
     transitionTimingFunc: PropTypes.string,
     transitionDelay: PropTypes.number,
     onTransitionEnd: PropTypes.func,
