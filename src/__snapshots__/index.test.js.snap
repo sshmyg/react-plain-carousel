@@ -9,6 +9,7 @@ exports[`<Carousel /> should matches the snapshot 1`] = `
   isInfinity={true}
   longTouchDelay={250}
   onMount={[Function]}
+  touchThreshold={2}
   transitionDelay={500}
   transitionTimingFunc="ease"
 >

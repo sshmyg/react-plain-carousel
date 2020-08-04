@@ -7,16 +7,17 @@ Works fine on mobile with swipes.
 ## Props
 ```javascript
 {
-    isInfinity: PropTypes.bool,
-    autoplay: PropTypes.bool,
-    autoplayDelay: PropTypes.number,
-    longTouchDelay: PropTypes.number,
-    transitionTimingFunc: PropTypes.string,
-    transitionDelay: PropTypes.number,
-    onTransitionEnd: PropTypes.func,
-    className: PropTypes.string,
-    innerClassName: PropTypes.string,
-    children: PropTypes.node,
-    onMount: PropTypes.func
+  autoplay: PropTypes.bool,
+  autoplayDelay: PropTypes.number,
+  longTouchDelay: PropTypes.number,
+  touchThreshold: : PropTypes.number,
+  transitionDelay: PropTypes.number,
+  transitionTimingFunc: PropTypes.string,
+  children: PropTypes.node,
+  className: PropTypes.string,
+  innerClassName: PropTypes.string,
+  isInfinity: PropTypes.bool,
+  onTransitionEnd: PropTypes.func,
+  onMount: PropTypes.func
 }
 ```
